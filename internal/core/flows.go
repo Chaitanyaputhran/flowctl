@@ -829,10 +829,11 @@ func (c *Core) CreateFlow(ctx context.Context, f models.Flow, namespaceID string
 
 func (c *Core) UpdateFlow(ctx context.Context, f models.Flow, namespaceID string) error {
 	c.rwf.RLock()
-	if _, exists := c.flows[fmt.Sprintf("%s:%s", f.Meta.ID, namespaceID)]; !exists {
+	_, exists := c.flows[fmt.Sprintf("%s:%s", f.Meta.ID, namespaceID)]
+	c.rwf.RUnlock()
+	if !exists {
 		return fmt.Errorf("flow with id %s does not exist", f.Meta.ID)
 	}
-	c.rwf.RUnlock()
 
 	// Remove duplicate schedules
 	f.Schedules = removeDuplicateSchedules(f.Schedules)
@@ -891,10 +892,11 @@ func (c *Core) UpdateFlow(ctx context.Context, f models.Flow, namespaceID string
 
 func (c *Core) DeleteFlow(ctx context.Context, flowID, namespaceID string) error {
 	c.rwf.RLock()
-	if _, exists := c.flows[fmt.Sprintf("%s:%s", flowID, namespaceID)]; !exists {
+	_, exists := c.flows[fmt.Sprintf("%s:%s", flowID, namespaceID)]
+	c.rwf.RUnlock()
+	if !exists {
 		return fmt.Errorf("flow with id %s does not exist", flowID)
 	}
-	c.rwf.RUnlock()
 
 	namespaceUUID, err := uuid.Parse(namespaceID)
 	if err != nil {
